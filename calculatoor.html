@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>КАЛЬКУЛЯТОР - APPLE</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+    }
+
+    body {
+      background-color: #0a0a14;
+      color: #e8e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    body.light-theme {
+      background-color: #f5f5f7;
+      color: #1d1d1f;
+    }
+
+    body.menu-open {
+      overflow: hidden;
+    }
+
+    /* Шапка – на всю ширину */
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      border-bottom: 1px solid #2a2a3a;
+      background-color: #12121e;
+      width: 100%;
+      box-sizing: border-box;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .light-theme .status-bar {
+      background-color: #f9f9f9;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .status-logo {
+      height: 30px;
+      width: auto;
+      filter: brightness(0) invert(1);
+      transition: filter 0.3s ease;
+      cursor: pointer;
+    }
+
+    .light-theme .status-logo {
+      filter: none;
+    }
+
+    .status-title {
+      font-weight: 800;
+      font-size: 20px;
+      margin-right: auto;
+      margin-left: 15px;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #a855f7, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+      cursor: pointer;
+    }
+
+    .light-theme .status-title {
+      background: none;
+      -webkit-text-fill-color: initial;
+      text-shadow: none;
+      color: #1d1d1f;
+    }
+
+    /* Меню */
+    .menu-button {
+      background: none;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 8px 12px;
+      color: #e8e8f0;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+
+    .light-theme .menu-button {
+      color: #1d1d1f;
+    }
+
+    .menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      display: none;
+    }
+
+    .menu-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 280px;
+      height: 100%;
+      background: linear-gradient(135deg, #1e1b2e, #12121e);
+      padding: 20px;
+      box-shadow: -2px 0 15px rgba(0, 0, 0, 0.3);
+      z-index: 1001;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      border-left: 1px solid #2a2a3a;
+    }
+
+    .light-theme .menu-panel {
+      background: linear-gradient(135deg, #f9f9f9, #f5f5f7);
+      box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+      border-left: 1px solid #e0e0e0;
+    }
+
+    .menu-panel.open {
+      transform: translateX(0);
+    }
+
+    .menu-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #2a2a3a;
+    }
+
+    .light-theme .menu-header {
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .menu-header h3 {
+      font-weight: 800;
+      font-size: 22px;
+      color: #e8e8f0;
+    }
+
+    .light-theme .menu-header h3 {
+      color: #1d1d1f;
+    }
+
+    .close-menu {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #e8e8f0;
+      transition: color 0.3s ease;
+    }
+
+    .light-theme .close-menu {
+      color: #1d1d1f;
+    }
+
+    .menu-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .menu-link {
+      text-decoration: none;
+      color: #e8e8f0;
+      font-size: 18px;
+      font-weight: 700;
+      padding: 15px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #2a2a3a, #1e1b2e);
+      transition: all 0.3s ease;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      border: 1px solid #3a3a4a;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .light-theme .menu-link {
+      color: #1d1d1f;
+      background: linear-gradient(135deg, #f0f0f0, #e8e8e8);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e0e0e0;
+    }
+
+    .menu-link:hover {
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+    }
+
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px;
+      background: linear-gradient(135deg, #2a2a3a, #1e1b2e);
+      border-radius: 10px;
+      border: 1px solid #3a3a4a;
+      margin-top: 10px;
+    }
+
+    .light-theme .theme-toggle {
+      background: linear-gradient(135deg, #f0f0f0, #e8e8e8);
+      border: 1px solid #e0e0e0;
+    }
+
+    .theme-toggle span {
+      font-weight: 600;
+      color: #e8e8f0;
+      font-size: 18px;
+    }
+
+    .light-theme .theme-toggle span {
+      color: #1d1d1f;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, #2a2a3a, #1e1b2e);
+      transition: .4s;
+      border-radius: 24px;
+      border: 1px solid #3a3a4a;
+    }
+
+    .light-theme .slider {
+      background: linear-gradient(135deg, #e0e0e0, #d0d0d0);
+      border: 1px solid #d0d0d0;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 3px;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+      background: white;
+    }
+
+    /* Основной контент калькулятора */
+    .main-content {
+      flex: 1;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 30px 20px;
+      box-sizing: border-box;
+    }
+
+    .calculator-section {
+      margin-bottom: 40px;
+    }
+
+    .section-title {
+      font-size: 32px;
+      font-weight: 600;
+      margin: 0 0 30px 0;
+      text-align: center;
+      color: #e8e8f0;
+      text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+      position: relative;
+      padding-bottom: 15px;
+      transition: color 0.3s ease;
+    }
+
+    .light-theme .section-title {
+      color: #1d1d1f;
+      text-shadow: none;
+    }
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 4px;
+      background: linear-gradient(90deg, #a855f7, #6366f1);
+      border-radius: 2px;
+      box-shadow: 0 0 8px rgba(168, 85, 247, 0.5);
+      clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+    }
+
+    /* Блоки вакансий */
+    .vacancy-block {
+      background: linear-gradient(135deg, #1e1b2e, #12121e);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.1),
+                  0 0 5px rgba(168, 85, 247, 0.1);
+      border: 1px solid #2a2a3a;
+      animation: card-glow 3s ease-in-out infinite;
+    }
+
+    .light-theme .vacancy-block {
+      background: white;
+      box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.05),
+                  0 0 3px rgba(168, 85, 247, 0.05);
+      border: 1px solid #e0e0e0;
+      animation: card-glow-light 3s ease-in-out infinite;
+    }
+
+    .vacancy-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 25px;
+      text-align: center;
+      color: #ffffff;
+      text-shadow: 0 0 5px rgba(168, 85, 247, 0.3);
+      transition: color 0.3s ease;
+      background: linear-gradient(135deg, #2a1b4e, #1e1340);
+      padding: 20px;
+      border-radius: 15px;
+      border: 2px solid #a855f7;
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .light-theme .vacancy-title {
+      color: #1d1d1f;
+      text-shadow: none;
+      background: white;
+      border: 2px solid #9333ea;
+      box-shadow: 0 0 10px rgba(147, 51, 234, 0.3);
+    }
+
+    .calculator-group {
+      margin-bottom: 25px;
+    }
+
+    .calculator-label {
+      display: block;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #e8e8f0;
+      transition: color 0.3s ease;
+    }
+
+    .light-theme .calculator-label {
+      color: #1d1d1f;
+    }
+
+    .slider-container {
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    .calculator-slider {
+      width: 100%;
+      height: 8px;
+      border-radius: 4px;
+      background: #2a2a3a;
+      outline: none;
+      -webkit-appearance: none;
+      transition: background 0.3s ease;
+    }
+
+    .light-theme .calculator-slider {
+      background: #e0e0e0;
+    }
+
+    .calculator-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+      transition: all 0.3s ease;
+    }
+
+    .calculator-slider::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+      border: none;
+    }
+
+    .calculator-value {
+      text-align: center;
+      font-size: 20px;
+      font-weight: 700;
+      color: #a855f7;
+      margin-top: 10px;
+      text-shadow: 0 0 5px rgba(168, 85, 247, 0.3);
+    }
+
+    .light-theme .calculator-value {
+      color: #9333ea;
+    }
+
+    /* Селекты и радио */
+    .select-container, .radio-container {
+      margin-bottom: 20px;
+    }
+
+    .calculator-select {
+      width: 100%;
+      padding: 12px 15px;
+      border-radius: 10px;
+      background: #2a2a3a;
+      border: 1px solid #3a3a4a;
+      color: #e8e8f0;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .light-theme .calculator-select {
+      background: #f5f5f7;
+      border: 1px solid #e0e0e0;
+      color: #1d1d1f;
+    }
+
+    .calculator-select option {
+      background: #2a2a3a;
+      color: #e8e8f0;
+      padding: 10px;
+    }
+
+    .light-theme .calculator-select option {
+      background: white;
+      color: #1d1d1f;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .radio-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .radio-custom {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #a855f7;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+
+    .radio-item input[type="radio"] {
+      display: none;
+    }
+
+    .radio-item input[type="radio"]:checked + .radio-custom::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #a855f7;
+    }
+
+    /* Чекбоксы */
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+    }
+
+    .checkbox-custom {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #a855f7;
+      position: relative;
+      transition: all 0.3s ease;
+      background: transparent;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      display: none;
+    }
+
+    .checkbox-item input[type="checkbox"]:checked + .checkbox-custom {
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+    }
+
+    .checkbox-item input[type="checkbox"]:checked + .checkbox-custom::after {
+      content: '✓';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .checkbox-text {
+      font-size: 16px;
+      font-weight: 500;
+      color: #e8e8f0;
+      transition: color 0.3s ease;
+    }
+
+    .light-theme .checkbox-text {
+      color: #1d1d1f;
+    }
+
+    .highlight {
+      color: #a855f7;
+      font-weight: 700;
+      text-decoration: underline;
+    }
+
+    /* Результат */
+    .result-container {
+      background: linear-gradient(135deg, #1e1b2e, #12121e);
+      border-radius: 20px;
+      padding: 25px;
+      margin-top: 30px;
+      border: 1px solid #2a2a3a;
+      text-align: center;
+      box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.1),
+                  0 0 5px rgba(168, 85, 247, 0.1);
+    }
+
+    .light-theme .result-container {
+      background: white;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.05),
+                  0 0 3px rgba(168, 85, 247, 0.05);
+    }
+
+    .result-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #e8e8f0;
+      transition: color 0.3s ease;
+    }
+
+    .light-theme .result-title {
+      color: #1d1d1f;
+    }
+
+    .result-amount {
+      font-size: 36px;
+      font-weight: 800;
+      background: linear-gradient(90deg, #a855f7, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+      margin-bottom: 10px;
+    }
+
+    .light-theme .result-amount {
+      background: linear-gradient(90deg, #9333ea, #4f46e5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .result-description {
+      font-size: 14px;
+      color: #a0a0b0;
+      transition: color 0.3s ease;
+    }
+
+    .light-theme .result-description {
+      color: #86868b;
+    }
+
+    /* Кнопка отклика */
+    .response-button {
+      display: block;
+      width: 100%;
+      max-width: 300px;
+      margin: 30px auto;
+      background: linear-gradient(135deg, #a855f7, #6366f1);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 18px 30px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      text-align: center;
+      animation: pulse-button 2s infinite;
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
+    }
+
+    .response-button:hover {
+      background: linear-gradient(135deg, #9333ea, #4f46e5);
+      animation: none;
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.7);
+      transform: translateY(-2px);
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px 20px;
+      color: #a0a0b0;
+      font-size: 14px;
+      border-top: 1px solid #2a2a3a;
+      margin-top: 20px;
+      background-color: #0a0a14;
+      transition: all 0.3s ease;
+    }
+
+    .light-theme footer {
+      background-color: #f5f5f7;
+      color: #86868b;
+      border-top: 1px solid #e0e0e0;
+    }
+
+    .footer-links {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .footer-links a {
+      font-weight: bold;
+      color: inherit;
+      text-decoration: none;
+      transition: color 0.3s ease;
+      position: relative;
+    }
+
+    .footer-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #a855f7, #6366f1);
+      transition: width 0.3s ease;
+    }
+
+    .footer-links a:hover {
+      color: #a855f7;
+    }
+
+    .footer-links a:hover::after {
+      width: 100%;
+    }
+
+    .footer-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 15px;
+      color: #e8e8f0;
+      text-shadow: 0 0 5px rgba(168, 85, 247, 0.3);
+      transition: color 0.3s ease;
+    }
+
+    .light-theme .footer-title {
+      color: #1d1d1f;
+      text-shadow: none;
+    }
+
+    @keyframes pulse-button {
+      0% {
+        box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 10px rgba(168, 85, 247, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(168, 85, 247, 0);
+      }
+    }
+
+    @keyframes card-glow {
+      0% {
+        box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.1),
+                    0 0 5px rgba(168, 85, 247, 0.1);
+      }
+      50% {
+        box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.3),
+                    0 0 15px rgba(168, 85, 247, 0.2);
+      }
+      100% {
+        box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.1),
+                    0 0 5px rgba(168, 85, 247, 0.1);
+      }
+    }
+
+    @keyframes card-glow-light {
+      0% {
+        box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.05),
+                    0 0 3px rgba(168, 85, 247, 0.05);
+      }
+      50% {
+        box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.2),
+                    0 0 10px rgba(168, 85, 247, 0.1);
+      }
+      100% {
+        box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.05),
+                    0 0 3px rgba(168, 85, 247, 0.05);
+      }
+    }
+
+    /* Адаптивность */
+    @media (max-width: 600px) {
+      .main-content {
+        padding: 20px 15px;
+      }
+      
+      .vacancy-block {
+        padding: 20px;
+      }
+      
+      .section-title {
+        font-size: 28px;
+      }
+      
+      .result-amount {
+        font-size: 28px;
+      }
+      
+      .response-button {
+        padding: 15px 25px;
+        font-size: 16px;
+      }
+      
+      .radio-group {
+        flex-direction: column;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Шапка на всю ширину экрана -->
+  <header class="status-bar">
+    <img src="https://i.ibb.co/hFGqKQh8/5abb9679-dc1b-479b-847b-2d0dbcbf3cda.png" alt="Логотип" class="status-logo" onclick="scrollToTop()" />
+    <div class="status-title" onclick="scrollToTop()">APPLE</div>
+    <button class="menu-button">Меню</button>
+  </header>
+
+  <!-- Меню -->
+  <div class="menu-overlay" id="menuOverlay"></div>
+  <div class="menu-panel" id="menuPanel">
+    <div class="menu-header">
+      <h3>Меню</h3>
+      <button class="close-menu" id="closeMenu">✕</button>
+    </div>
+    <div class="menu-links">
+      <a href="main.html" class="menu-link">ГЛАВНАЯ</a>
+      <a href="vacancy.html" class="menu-link">ВАКАНСИИ</a>
+      <a href="product.html" class="menu-link">ВИТРИНА</a>
+      <a href="calculatoor.html" class="menu-link">КАЛЬКУЛЯТОР</a>
+      <a href="pseudo.html" class="menu-link">О APPLE</a>
+    </div>
+    <div class="theme-toggle">
+      <span>Темная тема</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="themeToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Основной контент -->
+  <div class="main-content">
+    <section class="calculator-section" id="calculator">
+      <h2 class="section-title">КАЛЬКУЛЯТОР</h2>
+      
+      <!-- БЛОК КУРЬЕРА -->
+      <div class="vacancy-block">
+        <h3 class="vacancy-title">Курьер</h3>
+        
+        <div class="calculator-group">
+          <label class="calculator-label">Кол-во кладов в день</label>
+          <div class="slider-container">
+            <input type="range" min="1" max="100" value="5" class="calculator-slider" id="kladCount">
+          </div>
+          <div class="calculator-value" id="kladCountValue">5 кладов</div>
+        </div>
+
+        <div class="calculator-group">
+          <label class="calculator-label">Кол-во грамм</label>
+          <div class="slider-container">
+            <input type="range" min="0.5" max="9" step="0.5" value="1" class="calculator-slider" id="packageWeight">
+          </div>
+          <div class="calculator-value" id="packageWeightValue">1 грамм</div>
+        </div>
+
+        <div class="calculator-group">
+          <label class="calculator-label">Рабочих дней в месяц</label>
+          <div class="slider-container">
+            <input type="range" min="1" max="30" value="20" class="calculator-slider" id="workDays">
+          </div>
+          <div class="calculator-value" id="workDaysValue">20 дней</div>
+        </div>
+
+        <div class="calculator-group">
+          <label class="calculator-label">Надбавки (+100₽ за клад)</label>
+          <div class="checkbox-group">
+            <label class="checkbox-item">
+              <input type="checkbox" id="option1" checked>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">Клад на магните</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="option2" checked>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">Клад в центре города</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="option3" checked>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">Самостоятельная фасовка</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="result-container">
+          <div class="result-title">Потенциальный доход</div>
+          <div class="result-amount" id="courierAmount">0 ₽</div>
+          <div class="result-description" id="courierDescription">в месяц</div>
+        </div>
+      </div>
+
+      <!-- БЛОК ПЕРЕВОЗЧИКА -->
+      <div class="vacancy-block">
+        <h3 class="vacancy-title">Перевозчик</h3>
+        
+        <div class="calculator-group">
+          <label class="calculator-label">Кол-во рейсов в месяц</label>
+          <div class="slider-container">
+            <input type="range" min="1" max="50" value="10" class="calculator-slider" id="tripCount">
+          </div>
+          <div class="calculator-value" id="tripCountValue">10 рейсов</div>
+        </div>
+
+        <div class="calculator-group">
+          <label class="calculator-label">Кол-во грамм за рейс</label>
+          <div class="slider-container">
+            <input type="range" min="1000" max="9000" step="1000" value="1000" class="calculator-slider" id="tripWeight">
+          </div>
+          <div class="calculator-value" id="tripWeightValue">1.000 грамм</div>
+        </div>
+
+        <div class="calculator-group">
+          <label class="calculator-label">Кол-во километров за рейс</label>
+          <div class="slider-container">
+            <input type="range" min="100" max="9000" step="100" value="500" class="calculator-slider" id="tripDistance">
+          </div>
+          <div class="calculator-value" id="tripDistanceValue">500 км</div>
+        </div>
+
+        <div class="calculator-group">
+          <label class="calculator-label">Компенсация</label>
+          <div class="checkbox-group">
+            <label class="checkbox-item">
+              <input type="checkbox" id="tOption1" checked disabled>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">Компенсация ТО/Ремонт авто</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="tOption2" checked disabled>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">Компенсация аренды жилья</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="tOption3" checked disabled>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">Компенсация расходников</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="result-container">
+          <div class="result-title">Потенциальный доход</div>
+          <div class="result-amount" id="transporterAmount">0 ₽</div>
+          <div class="result-description" id="transporterDescription">в месяц</div>
+        </div>
+      </div>
+
+      <!-- БЛОК ХИМИКА -->
+      <div class="vacancy-block">
+        <h3 class="vacancy-title">Химик</h3>
+        
+        <div class="calculator-group">
+          <label class="calculator-label">Кол-во килограмм в месяц</label>
+          <div class="slider-container">
+            <input type="range" min="1" max="50" value="10" class="calculator-slider" id="chemWeight">
+          </div>
+          <div class="calculator-value" id="chemWeightValue">10 кг</div>
+        </div>
+
+        <div class="select-container">
+          <label class="calculator-label">Вид товара</label>
+          <select class="calculator-select" id="chemProduct">
+            <option value="220000">Мефедрон - 220.000₽/кг</option>
+            <option value="200000">СК - 200.000₽/кг</option>
+            <option value="180000">Гашиш - 180.000₽/кг</option>
+            <option value="140000">Амфетамин - 140.000₽/кг</option>
+          </select>
+        </div>
+
+        <div class="radio-container">
+          <label class="calculator-label">Уровень опыта</label>
+          <div class="radio-group">
+            <label class="radio-item">
+              <input type="radio" name="experience" value="1" checked>
+              <span class="radio-custom"></span>
+              <span class="checkbox-text">Новичок</span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="experience" value="1.5">
+              <span class="radio-custom"></span>
+              <span class="checkbox-text">Опытный <span class="highlight">(×1.5 к прибыли)</span></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="calculator-group">
+          <label class="calculator-label">Компенсация</label>
+          <div class="checkbox-group">
+            <label class="checkbox-item">
+              <input type="checkbox" id="cOption1" checked disabled>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">Компенсация оборудования</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="cOption2" checked disabled>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">Аренда помещения под работу</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="cOption3" checked disabled>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">Компенсация прекурсоров</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="result-container">
+          <div class="result-title">Потенциальный доход</div>
+          <div class="result-amount" id="chemistAmount">0 ₽</div>
+          <div class="result-description" id="chemistDescription">в месяц</div>
+        </div>
+      </div>
+
+      <!-- БЛОК ГРАФФИТЧИКА -->
+      <div class="vacancy-block">
+        <h3 class="vacancy-title">Граффитчик</h3>
+        
+        <div class="calculator-group">
+          <label class="calculator-label">Кол-во штук в месяц</label>
+          <div class="slider-container">
+            <input type="range" min="1" max="1000" value="100" class="calculator-slider" id="graffitiCount">
+          </div>
+          <div class="calculator-value" id="graffitiCountValue">100 штук</div>
+        </div>
+
+        <div class="select-container">
+          <label class="calculator-label">Вид рекламы</label>
+          <select class="calculator-select" id="graffitiType">
+            <option value="100">Стикеры - 100₽/шт</option>
+            <option value="125">Листовки - 125₽/шт</option>
+            <option value="150">Граффити - 150₽/шт</option>
+          </select>
+        </div>
+
+        <div class="radio-container">
+          <label class="calculator-label">Расположение</label>
+          <div class="radio-group">
+            <label class="radio-item">
+              <input type="radio" name="location" value="1" checked>
+              <span class="radio-custom"></span>
+              <span class="checkbox-text">По городу</span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="location" value="1.5">
+              <span class="radio-custom"></span>
+              <span class="checkbox-text">Центр <span class="highlight">(×1.5 к прибыли)</span></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="calculator-group">
+          <label class="calculator-label">Компенсация</label>
+          <div class="checkbox-group">
+            <label class="checkbox-item">
+              <input type="checkbox" id="gOption1" checked disabled>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">Компенсация расходников</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="gOption2" checked disabled>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">Предоставляем трафареты</span>
+            </label>
+            <label class="checkbox-item">
+              <input type="checkbox" id="gOption3" checked disabled>
+              <span class="checkbox-custom"></span>
+              <span class="checkbox-text">Возможен карьерный рост</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="result-container">
+          <div class="result-title">Потенциальный доход</div>
+          <div class="result-amount" id="graffitiAmount">0 ₽</div>
+          <div class="result-description" id="graffitiDescription">в месяц</div>
+        </div>
+      </div>
+
+      <a href="https://t.me/voorw" class="response-button">Откликнуться на вакансию</a>
+    </section>
+  </div>
+  
+  <footer id="footer">
+    <div class="footer-title">НАВИГАЦИЯ</div>
+    <div class="footer-links">
+      <a href="https://t.me/voorw" target="_blank" rel="noopener">Бот-продаж в Telegram</a>
+      <a href="https://t.me/voorw" target="_blank" rel="noopener">Оператор София</a>
+      <a href="https://t.me/voorw" target="_blank" rel="noopener">Комьюнити в Telegram</a>
+      <a href="https://t.me/voorw" target="_blank" rel="noopener">Трудоустройство</a>
+      <a href="https://t.me/voorw" target="_blank" rel="noopener">Канал клиент-отзывов</a>
+      <a href="https://t.me/voorw" target="_blank" rel="noopener">Контакты Kraken</a>
+    </div>
+    <p>© 2025 APPLE. Sky level of euphoria.</p>
+  </footer>
+
+  <script>
+    // Цены за фасовку для курьера
+    const packagePrices = {
+      0.5: 900,
+      1: 1000,
+      1.5: 1050,
+      2: 1100,
+      2.5: 1150,
+      3: 1200,
+      3.5: 1250,
+      4: 1300,
+      4.5: 1350,
+      5: 1400,
+      5.5: 1450,
+      6: 1500,
+      6.5: 1550,
+      7: 1600,
+      7.5: 1650,
+      8: 1700,
+      8.5: 1750,
+      9: 1800
+    };
+
+    // Элементы для курьера
+    const kladCountSlider = document.getElementById('kladCount');
+    const packageWeightSlider = document.getElementById('packageWeight');
+    const workDaysSlider = document.getElementById('workDays');
+    const option1 = document.getElementById('option1');
+    const option2 = document.getElementById('option2');
+    const option3 = document.getElementById('option3');
+
+    // Элементы для перевозчика
+    const tripCountSlider = document.getElementById('tripCount');
+    const tripWeightSlider = document.getElementById('tripWeight');
+    const tripDistanceSlider = document.getElementById('tripDistance');
+
+    // Элементы для химика
+    const chemWeightSlider = document.getElementById('chemWeight');
+    const chemProductSelect = document.getElementById('chemProduct');
+    const experienceRadios = document.querySelectorAll('input[name="experience"]');
+
+    // Элементы для граффитчика
+    const graffitiCountSlider = document.getElementById('graffitiCount');
+    const graffitiTypeSelect = document.getElementById('graffitiType');
+    const locationRadios = document.querySelectorAll('input[name="location"]');
+
+    // Элементы значений
+    const kladCountValue = document.getElementById('kladCountValue');
+    const packageWeightValue = document.getElementById('packageWeightValue');
+    const workDaysValue = document.getElementById('workDaysValue');
+    const tripCountValue = document.getElementById('tripCountValue');
+    const tripWeightValue = document.getElementById('tripWeightValue');
+    const tripDistanceValue = document.getElementById('tripDistanceValue');
+    const chemWeightValue = document.getElementById('chemWeightValue');
+    const graffitiCountValue = document.getElementById('graffitiCountValue');
+
+    // Элементы результатов
+    const courierAmount = document.getElementById('courierAmount');
+    const courierDescription = document.getElementById('courierDescription');
+    const transporterAmount = document.getElementById('transporterAmount');
+    const transporterDescription = document.getElementById('transporterDescription');
+    const chemistAmount = document.getElementById('chemistAmount');
+    const chemistDescription = document.getElementById('chemistDescription');
+    const graffitiAmount = document.getElementById('graffitiAmount');
+    const graffitiDescription = document.getElementById('graffitiDescription');
+
+    // Функции обновления значений
+    function updateCourierValues() {
+      const kladCount = parseInt(kladCountSlider.value);
+      const packageWeight = parseFloat(packageWeightSlider.value);
+      const workDays = parseInt(workDaysSlider.value);
+      
+      kladCountValue.textContent = `${kladCount} ${getKladWord(kladCount)}`;
+      packageWeightValue.textContent = `${packageWeight} ${getGramWord(packageWeight)}`;
+      workDaysValue.textContent = `${workDays} ${getDayWord(workDays)}`;
+    }
+
+    function updateTransporterValues() {
+      const tripCount = parseInt(tripCountSlider.value);
+      const tripWeight = parseInt(tripWeightSlider.value);
+      const tripDistance = parseInt(tripDistanceSlider.value);
+      
+      tripCountValue.textContent = `${tripCount} ${getTripWord(tripCount)}`;
+      tripWeightValue.textContent = `${tripWeight.toLocaleString('ru-RU')} грамм`;
+      tripDistanceValue.textContent = `${tripDistance.toLocaleString('ru-RU')} км`;
+    }
+
+    function updateChemistValues() {
+      const chemWeight = parseInt(chemWeightSlider.value);
+      chemWeightValue.textContent = `${chemWeight} кг`;
+    }
+
+    function updateGraffitiValues() {
+      const graffitiCount = parseInt(graffitiCountSlider.value);
+      graffitiCountValue.textContent = `${graffitiCount} ${getPieceWord(graffitiCount)}`;
+    }
+
+    // Функции для правильного склонения слов
+    function getKladWord(count) {
+      if (count % 10 === 1 && count % 100 !== 11) return 'клад';
+      if (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)) return 'клада';
+      return 'кладов';
+    }
+
+    function getGramWord(grams) {
+      if (grams === 0.5) return 'грамм';
+      if (grams % 1 === 0) {
+        if (grams === 1) return 'грамм';
+        if (grams >= 2 && grams <= 4) return 'грамма';
+        return 'грамм';
+      }
+      return 'грамма';
+    }
+
+    function getDayWord(days) {
+      if (days % 10 === 1 && days % 100 !== 11) return 'день';
+      if (days % 10 >= 2 && days % 10 <= 4 && (days % 100 < 10 || days % 100 >= 20)) return 'дня';
+      return 'дней';
+    }
+
+    function getTripWord(trips) {
+      if (trips % 10 === 1 && trips % 100 !== 11) return 'рейс';
+      if (trips % 10 >= 2 && trips % 10 <= 4 && (trips % 100 < 10 || trips % 100 >= 20)) return 'рейса';
+      return 'рейсов';
+    }
+
+    function getPieceWord(pieces) {
+      if (pieces % 10 === 1 && pieces % 100 !== 11) return 'штука';
+      if (pieces % 10 >= 2 && pieces % 10 <= 4 && (pieces % 100 < 10 || pieces % 100 >= 20)) return 'штуки';
+      return 'штук';
+    }
+
+    // Функции расчета доходов
+    function calculateCourierIncome() {
+      const kladCount = parseInt(kladCountSlider.value);
+      const packageWeight = parseFloat(packageWeightSlider.value);
+      const workDays = parseInt(workDaysSlider.value);
+      
+      // Базовая цена за фасовку
+      const basePrice = packagePrices[packageWeight];
+      
+      // Дополнительные опции
+      let extraPerKlad = 0;
+      if (option1.checked) extraPerKlad += 100;
+      if (option2.checked) extraPerKlad += 100;
+      if (option3.checked) extraPerKlad += 100;
+      
+      // Расчет общего дохода
+      const pricePerKlad = basePrice + extraPerKlad;
+      const dailyIncome = kladCount * pricePerKlad;
+      const monthlyIncome = dailyIncome * workDays;
+      
+      courierAmount.textContent = `${Math.round(monthlyIncome).toLocaleString('ru-RU')} ₽`;
+      courierDescription.textContent = `${kladCount} кладов × ${pricePerKlad}₽ × ${workDays} дней`;
+    }
+
+    function calculateTransporterIncome() {
+      const tripCount = parseInt(tripCountSlider.value);
+      const tripWeight = parseInt(tripWeightSlider.value);
+      const tripDistance = parseInt(tripDistanceSlider.value);
+      
+      // Расчет: 1000г = 100₽ за км, 2000г = 200₽ за км и т.д.
+      const pricePerKm = (tripWeight / 1000) * 100;
+      const incomePerTrip = pricePerKm * tripDistance;
+      const monthlyIncome = incomePerTrip * tripCount;
+      
+      transporterAmount.textContent = `${Math.round(monthlyIncome).toLocaleString('ru-RU')} ₽`;
+      transporterDescription.textContent = `${tripCount} рейсов × ${Math.round(pricePerKm)}₽/км × ${tripDistance}км`;
+    }
+
+    function calculateChemistIncome() {
+      const chemWeight = parseInt(chemWeightSlider.value);
+      const productPrice = parseInt(chemProductSelect.value);
+      const experienceMultiplier = document.querySelector('input[name="experience"]:checked').value;
+      
+      const monthlyIncome = chemWeight * productPrice * experienceMultiplier;
+      
+      const expText = experienceMultiplier == 1.5 ? ' (опытный)' : ' (новичок)';
+      chemistAmount.textContent = `${Math.round(monthlyIncome).toLocaleString('ru-RU')} ₽`;
+      chemistDescription.textContent = `${chemWeight}кг × ${productPrice.toLocaleString('ru-RU')}₽${expText}`;
+    }
+
+    function calculateGraffitiIncome() {
+      const graffitiCount = parseInt(graffitiCountSlider.value);
+      const graffitiPrice = parseInt(graffitiTypeSelect.value);
+      const locationMultiplier = document.querySelector('input[name="location"]:checked').value;
+      
+      const monthlyIncome = graffitiCount * graffitiPrice * locationMultiplier;
+      
+      const locText = locationMultiplier == 1.5 ? ' (центр)' : ' (город)';
+      graffitiAmount.textContent = `${Math.round(monthlyIncome).toLocaleString('ru-RU')} ₽`;
+      graffitiDescription.textContent = `${graffitiCount}шт × ${graffitiPrice}₽${locText}`;
+    }
+
+    // Слушатели событий для курьера
+    kladCountSlider.addEventListener('input', () => {
+      updateCourierValues();
+      calculateCourierIncome();
+    });
+    packageWeightSlider.addEventListener('input', () => {
+      updateCourierValues();
+      calculateCourierIncome();
+    });
+    workDaysSlider.addEventListener('input', () => {
+      updateCourierValues();
+      calculateCourierIncome();
+    });
+    option1.addEventListener('change', calculateCourierIncome);
+    option2.addEventListener('change', calculateCourierIncome);
+    option3.addEventListener('change', calculateCourierIncome);
+
+    // Слушатели событий для перевозчика
+    tripCountSlider.addEventListener('input', () => {
+      updateTransporterValues();
+      calculateTransporterIncome();
+    });
+    tripWeightSlider.addEventListener('input', () => {
+      updateTransporterValues();
+      calculateTransporterIncome();
+    });
+    tripDistanceSlider.addEventListener('input', () => {
+      updateTransporterValues();
+      calculateTransporterIncome();
+    });
+
+    // Слушатели событий для химика
+    chemWeightSlider.addEventListener('input', () => {
+      updateChemistValues();
+      calculateChemistIncome();
+    });
+    chemProductSelect.addEventListener('change', calculateChemistIncome);
+    experienceRadios.forEach(radio => {
+      radio.addEventListener('change', calculateChemistIncome);
+    });
+
+    // Слушатели событий для граффитчика
+    graffitiCountSlider.addEventListener('input', () => {
+      updateGraffitiValues();
+      calculateGraffitiIncome();
+    });
+    graffitiTypeSelect.addEventListener('change', calculateGraffitiIncome);
+    locationRadios.forEach(radio => {
+      radio.addEventListener('change', calculateGraffitiIncome);
+    });
+
+    // Инициализация
+    updateCourierValues();
+    updateTransporterValues();
+    updateChemistValues();
+    updateGraffitiValues();
+    calculateCourierIncome();
+    calculateTransporterIncome();
+    calculateChemistIncome();
+    calculateGraffitiIncome();
+
+    // Функция для прокрутки к началу страницы
+    function scrollToTop() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+
+    // Функции для работы меню
+    const menuButton = document.querySelector('.menu-button');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const menuPanel = document.getElementById('menuPanel');
+    const closeMenu = document.getElementById('closeMenu');
+    const body = document.body;
+
+    menuButton.addEventListener('click', () => {
+      menuOverlay.style.display = 'block';
+      menuPanel.classList.add('open');
+      body.classList.add('menu-open');
+    });
+
+    closeMenu.addEventListener('click', () => {
+      menuOverlay.style.display = 'none';
+      menuPanel.classList.remove('open');
+      body.classList.remove('menu-open');
+    });
+
+    menuOverlay.addEventListener('click', () => {
+      menuOverlay.style.display = 'none';
+      menuPanel.classList.remove('open');
+      body.classList.remove('menu-open');
+    });
+
+    // Закрытие меню при клике на ссылку
+    const menuLinks = document.querySelectorAll('.menu-links a');
+    menuLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        menuOverlay.style.display = 'none';
+        menuPanel.classList.remove('open');
+        body.classList.remove('menu-open');
+      });
+    });
+
+    // Переключение темы
+    const themeToggle = document.getElementById('themeToggle');
+
+    // Проверяем сохраненную тему в localStorage
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      body.classList.add('light-theme');
+      themeToggle.checked = false;
+    }
+
+    themeToggle.addEventListener('change', () => {
+      if (themeToggle.checked) {
+        body.classList.remove('light-theme');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        body.classList.add('light-theme');
+        localStorage.setItem('theme', 'light');
+      }
+    });
+  </script>
+
+</body>
+</html>
